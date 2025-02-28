@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
+    background-color: #e2cfff;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -14,6 +14,10 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
     width: 400px;
+    overflow-x: auto;
+    width: 80%;
+    max-width: 1200px;
+    margin: 20px auto;
 }
 
 input, textarea {
@@ -25,7 +29,7 @@ input, textarea {
 }
 
 button {
-    background-color: #007bff;
+    background-color: #7c169c;
     color: white;
     border: none;
     padding: 10px;
@@ -35,7 +39,7 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #7c169c;
 }
 
 #eventList {
@@ -71,7 +75,7 @@ th, td {
 }
 
 th {
-    background-color: #007bff;
+    background-color: #7c169c;
     color: white;
 }
 

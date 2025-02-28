@@ -3,11 +3,20 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 async function loadEvents() {
-    let response = await fetch("http://127.0.0.1:8000/events/");
+    let response = await fetch("http://127.0.0.1:8000/eventDashboard/");
+    
+    console.log("API Response Status:", response.status);  // Debugging
     let events = await response.json();
+    console.log("Fetched Events:", events);  // Debugging
 
     let tableBody = document.querySelector("#eventsTable tbody");
-    tableBody.innerHTML = "";  // Clear previous data
+    tableBody.innerHTML = "";  
+
+    if (!Array.isArray(events) || events.length === 0) {
+        console.log("No events found in response.");
+        tableBody.innerHTML = "<tr><td colspan='5'>No events available</td></tr>";
+        return;
+    }
 
     events.forEach(event => {
         let row = document.createElement("tr");
@@ -22,17 +31,4 @@ async function loadEvents() {
 
         tableBody.appendChild(row);
     });
-}
-
-async function bookEvent(eventId) {
-    let response = await fetch(`http://127.0.0.1:8000/events/${eventId}/book`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-    });
-
-    if (response.ok) {
-        alert("Event booked successfully!");
-    } else {
-        alert("Failed to book event!");
-    }
 }

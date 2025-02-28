@@ -43,4 +43,9 @@ def book_event(event_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Event booked successfully!"}
 
+@router.get("/eventDashboard/")
+def list_events(db: Session = Depends(get_db)):
+    events = db.query(Event).all()
+    return events  # ✅ Don't raise 404 if no events exist
+
 

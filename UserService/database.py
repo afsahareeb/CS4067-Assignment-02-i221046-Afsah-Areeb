@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 DATABASE_URL = "postgresql://postgres:1234@localhost/event_booking"
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
-Base = declarative_base()
-metadata = MetaData()
+engine = create_engine(DATABASE_URL) # establis connection with database
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False) # to interact with db(read/write)
+Base = declarative_base() # to create models
+metadata = MetaData() # stores schema information

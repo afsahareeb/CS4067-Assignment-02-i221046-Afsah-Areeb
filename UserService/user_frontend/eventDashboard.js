@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 async function loadEvents() {
-    let response = await fetch("http://127.0.0.1:8000/user/events");  // ✅ Fetch via User Service
+    let response = await fetch("http://127.0.0.1:8001/user/events");  // ✅ Fetch via User Service
 
     console.log("API Response Status:", response.status);
     let events = await response.json();

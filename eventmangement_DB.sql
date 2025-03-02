@@ -51,3 +51,48 @@ ADD COLUMN ticket_price FLOAT NOT NULL DEFAULT 50.0;  -- Default price per ticke
 -- ✅ Set a default value for organizer_id to 0
 ALTER TABLE events 
 ALTER COLUMN organizer_id SET DEFAULT 0;
+
+
+select * from users
+ALTER TABLE users ADD COLUMN balance FLOAT DEFAULT 100.0;
+
+CREATE TABLE bookings (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    event_id INT NOT NULL,
+    tickets INT NOT NULL,
+    total_price FLOAT NOT NULL,
+    status VARCHAR(50) DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+);
+
+
+select * from users
+select * from events
+select * from bookings
+
+-- ✅ Add columns for ticket count and price per ticket
+ALTER TABLE events 
+ADD COLUMN num_tickets INT NOT NULL DEFAULT 100,  -- Default 100 tickets available
+ADD COLUMN ticket_price FLOAT NOT NULL DEFAULT 50.0;  -- Default price per ticket is 50.0
+
+ALTER TABLE events 
+ALTER COLUMN organizer_id DROP NOT NULL, 
+ALTER COLUMN organizer_id SET DEFAULT NULL;
+
+INSERT INTO events (title, description, location, date, num_tickets, ticket_price)
+VALUES (
+    'Music Festival 2025', 
+    'A grand music festival with top artists.', 
+    'Los Angeles', 
+    '2025-07-20 18:00:00', 
+    500,  -- Total available tickets
+    100.00  -- Price per ticket
+);
+
+
+
+
+

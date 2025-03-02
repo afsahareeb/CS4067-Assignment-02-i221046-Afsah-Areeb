@@ -5,7 +5,7 @@ from database import SessionLocal
 from models import User
 from pydantic import BaseModel
 import requests
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException 
 
 router = APIRouter()
 
@@ -83,11 +83,12 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
     
     return {"message": "User created successfully!"}
 
-EVENT_SERVICE_URL = "http://127.0.0.1:8000/eventDashboard/"  # URL of event service
+EVENT_SERVICE_URL = "http://127.0.0.1:8000/events"  # ✅ Correct Event Service URL
 
 @router.get("/user/events")
 def get_available_events():
     try:
+        # ✅ Fetch events from Event Service (instead of querying the DB)
         response = requests.get(EVENT_SERVICE_URL)
         if response.status_code == 200:
             return response.json()
@@ -95,6 +96,8 @@ def get_available_events():
             raise HTTPException(status_code=response.status_code, detail="Failed to fetch events")
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Error connecting to Event Service: {str(e)}")
+
+
 
 @router.put("/users/{user_id}/update_balance")
 def update_balance(user_id: int, balance: float, db: Session = Depends(get_db)):
@@ -105,3 +108,19 @@ def update_balance(user_id: int, balance: float, db: Session = Depends(get_db)):
     user.balance = balance  # ✅ Update balance
     db.commit()
     return {"message": "Balance updated successfully", "new_balance": user.balance}
+
+@router.get("/events")
+def get_events(db: Session = Depends(get_db)):
+    events = db.query(Event).all()
+    return [
+        {
+            "id": event.id,
+            "title": event.title,
+            "description": event.description,
+            "location": event.location,
+            "date": event.date,
+            "num_tickets": event.num_tickets,  # ✅ Ensure tickets are included
+            "ticket_price": event.ticket_price if event.ticket_price else 0.0  # ✅ Prevent undefined values
+        }
+        for event in events
+    ]

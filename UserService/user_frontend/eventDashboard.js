@@ -14,11 +14,12 @@ async function loadEvents() {
 
     if (!Array.isArray(events) || events.length === 0) {
         console.log("No events found.");
-        tableBody.innerHTML = "<tr><td colspan='5'>No events available</td></tr>";
+        tableBody.innerHTML = "<tr><td colspan='7'>No events available</td></tr>";
         return;
     }
 
     events.forEach(event => {
+        console.log("Event Data:", event);  // ✅ Debugging - Log Each Event
         let row = document.createElement("tr");
 
         row.innerHTML = `
@@ -26,10 +27,11 @@ async function loadEvents() {
             <td>${event.description}</td>
             <td>${event.location}</td>
             <td>${new Date(event.date).toLocaleString()}</td>
+            <td>${event.num_tickets !== undefined ? event.num_tickets : "N/A"}</td>  <!-- ✅ Fix -->
+            <td>${event.ticket_price !== undefined ? `$${event.ticket_price.toFixed(2)}` : "N/A"}</td>  <!-- ✅ Fix -->
             <td><button class="book-btn" onclick="bookEvent(${event.id})">Book Now</button></td>
         `;
 
         tableBody.appendChild(row);
     });
 }
-

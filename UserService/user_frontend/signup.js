@@ -5,7 +5,7 @@ document.getElementById("signupForm").addEventListener("submit", async function(
     let lastName = document.getElementById("lastName").value;
     let email = document.getElementById("email").value;
     let password = document.getElementById("password").value;
-    let balance = parseFloat(document.getElementById("balance").value); // ✅ Get balance
+    let balance = parseFloat(document.getElementById("balance").value);
 
     let response = await fetch("http://127.0.0.1:8001/signup", {
         method: "POST",
@@ -17,7 +17,7 @@ document.getElementById("signupForm").addEventListener("submit", async function(
             last_name: lastName,
             email: email,
             password: password,
-            balance: balance  // ✅ Send balance to backend
+            balance: balance 
         })
     });
 
@@ -35,3 +35,30 @@ document.getElementById("signupForm").addEventListener("submit", async function(
         document.getElementById("signupMessage").innerText = data.detail || "Signup failed!";
     }
 });
+
+async function signupUser(firstName, lastName, email, password, balance) {
+    let response = await fetch("http://127.0.0.1:8001/signup", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            password: password,
+            balance: balance
+        })
+    });
+
+    let result = await response.json();
+
+    if (response.ok) {
+        sessionStorage.setItem("userEmail", result.user_email);
+        sessionStorage.setItem("userId", result.user_id);
+        alert("Signup successful!");
+        window.location.href = "events.html"; // Redirect to events page
+    } else {
+        alert("Signup failed: " + result.detail);
+    }
+}

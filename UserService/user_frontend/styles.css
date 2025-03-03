@@ -109,3 +109,8 @@ th {
 .book-btn:hover {
     background-color: #218838;
 }
+#status-message {
+    font-size: 20px;
+    font-weight: bold;
+    color: green;
+}

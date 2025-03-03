@@ -6,6 +6,9 @@ from models import User
 from pydantic import BaseModel
 import requests
 from fastapi import APIRouter, HTTPException 
+from fastapi import FastAPI
+
+app = FastAPI()
 
 router = APIRouter()
 
@@ -36,19 +39,6 @@ def create_user(first_name: str, last_name: str, email: str, password: str, db: 
         logger.error(f"Error creating user: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-"""
-@router.get("/users/{user_id}")
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == user_id).first()
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
-
-
-@router.get("/")
-def home():
-    return {"message": "Welcome to User Service!"}
-"""
 
 class LoginRequest(BaseModel):
     email: str
@@ -57,10 +47,12 @@ class LoginRequest(BaseModel):
 @router.post("/login")
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == request.email).first()
+    
     if not user or user.password_hash != request.password:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    return {"message": "Login successful!"}
+    return {"message": "Login successful!", "user_email": user.email, "user_id": user.id}
+
 
 class SignupRequest(BaseModel):
     first_name: str
@@ -86,7 +78,8 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     
-    return {"message": "User created successfully!"}
+    return {"message": "User created successfully!", "user_email": db_user.email, "user_id": db_user.id}
+
 
 
 EVENT_SERVICE_URL = "http://127.0.0.1:8000/events"
@@ -100,17 +93,59 @@ def get_available_events():
             raise HTTPException(status_code=response.status_code, detail="Failed to fetch events")
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Error connecting to Event Service: {str(e)}")
+    
 
+class DeductBalanceRequest(BaseModel):
+    amount: float  # Ensure only `amount` is required in the body
 
-"""
-@router.put("/users/{user_id}/update_balance")
-def update_balance(user_id: int, balance: float, db: Session = Depends(get_db)):
+@app.post("/users/{user_id}/deduct_balance")
+def deduct_balance(user_id: int, request: DeductBalanceRequest, db: Session = Depends(get_db)):
+    # Fetch the user from the database
     user = db.query(User).filter(User.id == user_id).first()
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    user.balance = balance  # ✅ Update balance
-    db.commit()
-    return {"message": "Balance updated successfully", "new_balance": user.balance}
+    # Check if the user has enough balance
+    if user.balance < request.amount:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Insufficient balance. User balance: {user.balance}"
+        )
 
-"""
+    # Deduct balance
+    user.balance -= request.amount
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "message": "Balance deducted successfully",
+        "user_id": user_id,
+        "deducted_amount": request.amount,
+        "remaining_balance": user.balance
+    }
+
+
+
+BOOKING_SERVICE_URL = "http://127.0.0.1:5000/booking"
+
+@router.post("/user/book_event")
+def book_event(data: dict):
+    try:
+        response = requests.post(BOOKING_SERVICE_URL, json=data)
+        
+        if response.status_code == 201:
+            return response.json()
+        else:
+            raise HTTPException(status_code=response.status_code, detail="Booking failed")
+    
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=500, detail=f"Error connecting to Booking Service: {str(e)}")
+
+
+@router.get("/users/{email}")
+def get_user_by_email(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"user_id": user.id, "email": user.email, "balance": user.balance}

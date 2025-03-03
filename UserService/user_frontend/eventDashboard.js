@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
 async function loadEvents() {
     let response = await fetch("http://127.0.0.1:8001/user/events");
+    console.log("Checking sessionStorage...");
+    console.log("Stored userEmail:", sessionStorage.getItem("userEmail"));
+    console.log("Stored userId:", sessionStorage.getItem("userId"));
 
     console.log("API Response Status:", response.status);
     let events = await response.json();
@@ -15,6 +18,12 @@ async function loadEvents() {
     if (!Array.isArray(events) || events.length === 0) {
         console.log("No events found.");
         tableBody.innerHTML = "<tr><td colspan='7'>No events available</td></tr>";
+        return;
+    }
+
+    let userEmail = sessionStorage.getItem("userEmail");
+    if (!userEmail) {
+        console.error("User email not found. Please log in.");
         return;
     }
 
@@ -31,10 +40,77 @@ async function loadEvents() {
             <td>
                 <input type="number" id="tickets-${event.id}" min="1" max="${event.num_tickets}" value="1">
             </td>
-            <td><button class="book-btn" onclick="bookEvent(${event.id}, ${event.num_tickets})">Book Now</button></td>
+            <td>
+                <button class="book-btn" onclick="bookEvent(${event.id}, ${event.num_tickets}, ${event.ticket_price}, '${userEmail}')">
+                    Book Now
+                </button>
+            </td>
         `;
 
         tableBody.appendChild(row);
     });
 }
+
+async function getUserId(userEmail) {
+    try {
+        let response = await fetch(`http://127.0.0.1:8001/users/${userEmail}`);
+        if (!response.ok) {
+            throw new Error("User not found");
+        }
+        let userData = await response.json();
+        return userData.user_id;
+    } catch (error) {
+        console.error("Error fetching user ID:", error);
+        return null;
+    }
+}
+
+
+async function bookEvent(eventId, availableTickets, ticketPrice, userEmail) {
+    let ticketInput = document.getElementById(`tickets-${eventId}`);
+    let numTickets = parseInt(ticketInput.value);
+
+    if (numTickets < 1 || numTickets > availableTickets) {
+        alert("Please enter a valid number of tickets.");
+        return;
+    }
+
+    let userId = await getUserId(userEmail);
+    if (!userId) {
+        alert("Failed to fetch user ID. Please log in.");
+        return;
+    }
+
+    let totalPrice = numTickets * ticketPrice;
+
+    let bookingData = {
+        user_id: userId,
+        event_id: eventId,
+        tickets: numTickets,
+        total_price: totalPrice
+    };
+
+    try {
+        let response = await fetch("http://127.0.0.1:8001/user/book_event", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(bookingData)
+        });
+
+        let result = await response.json();
+        console.log("Booking Response:", result);
+
+        if (response.ok) {
+            window.location.href = `booking_status.html?status=confirmed&total=${totalPrice}`;
+        } else {
+            window.location.href = `booking_status.html?status=failed`;
+        }
+    } catch (error) {
+        console.error("Error booking event:", error);
+        window.location.href = `booking_status.html?status=failed`;
+    }
+}
+
 

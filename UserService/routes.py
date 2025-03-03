@@ -62,7 +62,6 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 
     return {"message": "Login successful!"}
 
-# change this add balance to user
 class SignupRequest(BaseModel):
     first_name: str
     last_name: str

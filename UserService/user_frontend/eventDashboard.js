@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 async function loadEvents() {
-    let response = await fetch("http://127.0.0.1:8001/user/events");  // ✅ Fetch via User Service
+    let response = await fetch("http://127.0.0.1:8001/user/events");
 
     console.log("API Response Status:", response.status);
     let events = await response.json();
@@ -19,7 +19,6 @@ async function loadEvents() {
     }
 
     events.forEach(event => {
-        console.log("Event Data:", event);  // ✅ Debugging - Log Each Event
         let row = document.createElement("tr");
 
         row.innerHTML = `
@@ -27,11 +26,15 @@ async function loadEvents() {
             <td>${event.description}</td>
             <td>${event.location}</td>
             <td>${new Date(event.date).toLocaleString()}</td>
-            <td>${event.num_tickets !== undefined ? event.num_tickets : "N/A"}</td>  <!-- ✅ Fix -->
-            <td>${event.ticket_price !== undefined ? `$${event.ticket_price.toFixed(2)}` : "N/A"}</td>  <!-- ✅ Fix -->
-            <td><button class="book-btn" onclick="bookEvent(${event.id})">Book Now</button></td>
+            <td>${event.num_tickets !== undefined ? event.num_tickets : "N/A"}</td>
+            <td>${event.ticket_price !== undefined ? `$${event.ticket_price.toFixed(2)}` : "N/A"}</td>
+            <td>
+                <input type="number" id="tickets-${event.id}" min="1" max="${event.num_tickets}" value="1">
+            </td>
+            <td><button class="book-btn" onclick="bookEvent(${event.id}, ${event.num_tickets})">Book Now</button></td>
         `;
 
         tableBody.appendChild(row);
     });
 }
+

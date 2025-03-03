@@ -11,11 +11,8 @@ def get_db():
         yield db
     finally:
         db.close()
-
-@router.get("/events/")
-def list_events(db: Session = Depends(get_db)):
-    return db.query(Event).all()
-
+        
+"""
 @router.post("/events/{event_id}/register")
 def register_for_event(event_id: int, db: Session = Depends(get_db)):
     event = db.query(Event).filter(Event.id == event_id).first()
@@ -43,9 +40,27 @@ def book_event(event_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Event booked successfully!"}
 
+
 @router.get("/eventDashboard/")
 def list_events(db: Session = Depends(get_db)):
     events = db.query(Event).all()
-    return events  # ✅ Don't raise 404 if no events exist
+    return events
+"""
 
-
+@router.get("/events")
+def get_events(db: Session = Depends(get_db)):
+    events = db.query(Event).all()
+    for event in events:
+        print(f"Event ID: {event.id}, Tickets: {event.num_tickets}, Price: {event.ticket_price}")
+    return [
+        {
+            "id": event.id,
+            "title": event.title,
+            "description": event.description,
+            "location": event.location,
+            "date": event.date,
+            "num_tickets": event.num_tickets,  # ✅ Ensure tickets are included
+            "ticket_price": event.ticket_price if event.ticket_price else 0.0  # ✅ Prevent undefined values
+        }
+        for event in events
+    ]

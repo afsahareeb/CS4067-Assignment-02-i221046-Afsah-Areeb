@@ -19,6 +19,7 @@ def get_db():
     finally:
         db.close()
 
+# create a new user
 @router.post("/users/") # create API that accepts POST requests
 def create_user(first_name: str, last_name: str, email: str, password: str, db: Session = Depends(get_db)):
     try:
@@ -35,6 +36,7 @@ def create_user(first_name: str, last_name: str, email: str, password: str, db: 
         logger.error(f"Error creating user: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
+"""
 @router.get("/users/{user_id}")
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
@@ -42,28 +44,31 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
+
 @router.get("/")
 def home():
     return {"message": "Welcome to User Service!"}
+"""
 
 class LoginRequest(BaseModel):
     email: str
     password: str
 
-
 @router.post("/login")
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == request.email).first()
-    if not user or user.password_hash != request.password:  # TODO: Hash password before comparing
+    if not user or user.password_hash != request.password:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     return {"message": "Login successful!"}
 
+# change this add balance to user
 class SignupRequest(BaseModel):
     first_name: str
     last_name: str
     email: str
     password: str
+    balance: float
 
 @router.post("/signup")
 def signup(request: SignupRequest, db: Session = Depends(get_db)):
@@ -75,7 +80,8 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
         first_name=request.first_name,
         last_name=request.last_name,
         email=request.email,
-        password_hash=request.password
+        password_hash=request.password,
+        balance=request.balance
     )
     db.add(db_user)
     db.commit()
@@ -83,12 +89,11 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
     
     return {"message": "User created successfully!"}
 
-EVENT_SERVICE_URL = "http://127.0.0.1:8000/events"  # ✅ Correct Event Service URL
 
+EVENT_SERVICE_URL = "http://127.0.0.1:8000/events"
 @router.get("/user/events")
 def get_available_events():
     try:
-        # ✅ Fetch events from Event Service (instead of querying the DB)
         response = requests.get(EVENT_SERVICE_URL)
         if response.status_code == 200:
             return response.json()
@@ -98,7 +103,7 @@ def get_available_events():
         raise HTTPException(status_code=500, detail=f"Error connecting to Event Service: {str(e)}")
 
 
-
+"""
 @router.put("/users/{user_id}/update_balance")
 def update_balance(user_id: int, balance: float, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
@@ -109,18 +114,4 @@ def update_balance(user_id: int, balance: float, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Balance updated successfully", "new_balance": user.balance}
 
-@router.get("/events")
-def get_events(db: Session = Depends(get_db)):
-    events = db.query(Event).all()
-    return [
-        {
-            "id": event.id,
-            "title": event.title,
-            "description": event.description,
-            "location": event.location,
-            "date": event.date,
-            "num_tickets": event.num_tickets,  # ✅ Ensure tickets are included
-            "ticket_price": event.ticket_price if event.ticket_price else 0.0  # ✅ Prevent undefined values
-        }
-        for event in events
-    ]
+"""

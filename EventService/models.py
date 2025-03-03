@@ -11,3 +11,5 @@ class Event(Base):
     description = Column(Text, nullable=False)
     location = Column(String(255), nullable=False)
     date = Column(TIMESTAMP, default=datetime.utcnow)
+    num_tickets = Column(Integer, nullable=False)
+    ticket_price = Column(Integer, nullable=False)

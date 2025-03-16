@@ -28,7 +28,7 @@ document.getElementById("signupForm").addEventListener("submit", async function(
         document.getElementById("signupMessage").innerText = "Account created successfully!";
         
         setTimeout(() => {
-            window.location.href = "../user_frontend/eventDashboard.html";
+            window.location.href = "eventDashboard.html";
         }, 2000);
     } else {
         document.getElementById("signupMessage").style.color = "red";

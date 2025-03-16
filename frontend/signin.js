@@ -27,7 +27,7 @@ async function loginUser(email, password) {
         document.getElementById("message").innerText = "Login successful!";
 
         setTimeout(() => {
-            window.location.href = "../user_frontend/eventDashboard.html"; // Redirect after storing data
+            window.location.href = "eventDashboard.html"; // Redirect after storing data
         }, 2000);
     } else {
         document.getElementById("message").innerText = result.detail || "Login failed!";

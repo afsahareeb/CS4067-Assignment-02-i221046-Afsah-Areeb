@@ -1,11 +1,14 @@
 from flask import Flask
 from config import MONGO_URI
 from model import init_db
+from flask_cors import CORS
 from routes import booking_bp
 from routes import payment_bp
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = MONGO_URI
+
+CORS(app)
 
 # Initialize MongoDB
 init_db(app)

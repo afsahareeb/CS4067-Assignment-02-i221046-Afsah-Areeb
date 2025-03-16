@@ -103,7 +103,7 @@ async function bookEvent(eventId, availableTickets, ticketPrice, userEmail) {
         console.log("Booking Response:", result);
 
         if (response.ok) {
-            window.location.href = `booking_status.html?status=confirmed&total=${totalPrice}`;
+            window.location.href = `booking_status.html?status=confirmed&bookingId=${result.booking_id}&total=${totalPrice}`;
         } else {
             window.location.href = `booking_status.html?status=failed`;
         }

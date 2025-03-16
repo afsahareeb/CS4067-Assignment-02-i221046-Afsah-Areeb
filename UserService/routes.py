@@ -98,22 +98,16 @@ def get_available_events():
 class DeductBalanceRequest(BaseModel):
     amount: float  # Ensure only `amount` is required in the body
 
-@app.post("/users/{user_id}/deduct_balance")
+@router.post("/users/{user_id}/deduct_balance")  # Route Definition
 def deduct_balance(user_id: int, request: DeductBalanceRequest, db: Session = Depends(get_db)):
-    # Fetch the user from the database
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Check if the user has enough balance
     if user.balance < request.amount:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Insufficient balance. User balance: {user.balance}"
-        )
+        raise HTTPException(status_code=400, detail="Insufficient balance")
 
-    # Deduct balance
     user.balance -= request.amount
     db.commit()
     db.refresh(user)
@@ -121,7 +115,7 @@ def deduct_balance(user_id: int, request: DeductBalanceRequest, db: Session = De
     return {
         "message": "Balance deducted successfully",
         "user_id": user_id,
-        "deducted_amount": request.amount,
+        "user_email": user.email,
         "remaining_balance": user.balance
     }
 
@@ -133,6 +127,8 @@ BOOKING_SERVICE_URL = "http://127.0.0.1:5000/booking"
 def book_event(data: dict):
     try:
         response = requests.post(BOOKING_SERVICE_URL, json=data)
+        print("Booking Service Response Status:", response.status_code)  # Debugging
+        print("Booking Service Response JSON:", response.text)  # Debugging
         
         if response.status_code == 201:
             return response.json()
@@ -149,3 +145,27 @@ def get_user_by_email(email: str, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {"user_id": user.id, "email": user.email, "balance": user.balance}
+
+@router.get("/users/{user_id}")
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    print(f"Searching for user ID: {user_id}")  # Debugging line
+
+    user = db.query(User).filter(User.id == user_id).first()
+    print(f"User Query Result: {user}")  # Debugging line
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {
+        "user_id": user.id,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email,
+        "balance": user.balance
+    }
+
+
+@router.get("/debug_users")
+def debug_users(db: Session = Depends(get_db)):
+    users = db.query(User).all()
+    return users  # This will return all users in JSON format

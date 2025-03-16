@@ -5,13 +5,15 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     const statusMessage = document.getElementById("status-message");
 
-    if (bookingStatus === "confirmed" && bookingId) {
+    if (bookingStatus === "confirmed" && bookingId && bookingId.trim() !== "")
+        {
         try {
-            let response = await fetch(`http://127.0.0.1:5000/bookings/${bookingId}`);
+            let response = await fetch(`http://127.0.0.1:5000/booking/${bookingId}`);
             if (!response.ok) throw new Error("Failed to fetch booking details.");
 
             let bookingData = await response.json();
-            statusMessage.textContent = `Booking Confirmed! Booking ID: ${bookingData.booking_id}`;
+            console.log("Booking Data:", bookingData);
+            statusMessage.textContent = `Booking Confirmed! Booking ID: ${bookingData._id}`;
             statusMessage.style.color = "green";
         } catch (error) {
             console.error("Error fetching booking details:", error);

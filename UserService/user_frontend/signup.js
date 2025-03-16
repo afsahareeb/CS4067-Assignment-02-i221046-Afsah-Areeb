@@ -57,7 +57,7 @@ async function signupUser(firstName, lastName, email, password, balance) {
         sessionStorage.setItem("userEmail", result.user_email);
         sessionStorage.setItem("userId", result.user_id);
         alert("Signup successful!");
-        window.location.href = "events.html"; // Redirect to events page
+        window.location.href = "../user_frontend/eventDashboard.html"; // Redirect to events page
     } else {
         alert("Signup failed: " + result.detail);
     }

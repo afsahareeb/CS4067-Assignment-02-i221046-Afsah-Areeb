@@ -3,7 +3,8 @@ import json
 import smtplib
 from email.mime.text import MIMEText
 from config import RABBITMQ_URL, EMAIL_HOST, EMAIL_PORT, EMAIL_USERNAME, EMAIL_PASSWORD
-from mongo import mongo  # Ensure mongo is properly initialized
+from pymongo import MongoClient
+from mongo import mongo
 
 def send_email(to_email, subject, message):
     """Function to send emails"""

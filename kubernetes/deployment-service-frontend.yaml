@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: onlineeventbooking-afsah
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: 22i1046/frontend:latest
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: app-config  # Load API URLs from ConfigMap
+        env:
+        - name: EVENT_SERVICE_URL
+          value: "$(EVENT_SERVICE_URL)"  # From ConfigMap
+        - name: USER_SERVICE_URL
+          value: "$(USER_SERVICE_URL)"  # From ConfigMap
+        - name: BOOKING_SERVICE_URL
+          value: "$(BOOKING_SERVICE_URL)"  # From ConfigMap
+        - name: NOTIFICATION_SERVICE_URL
+          value: "$(NOTIFICATION_SERVICE_URL)"  # From ConfigMap
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: onlineeventbooking-afsah
+spec:
+  selector:
+    app: frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer  # Change to NodePort if required

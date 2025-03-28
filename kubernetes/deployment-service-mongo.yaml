@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-booking-db-deployment
+  namespace: onlineeventbooking-afsah
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-booking-db
+  template:
+    metadata:
+      labels:
+        app: mongo-booking-db
+    spec:
+      containers:
+      - name: mongo-booking-db
+        image: mongo:latest
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongo-storage
+          mountPath: /data/db
+      volumes:
+      - name: mongo-storage
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-booking-db
+  namespace: onlineeventbooking-afsah
+spec:
+  selector:
+    app: mongo-booking-db
+  ports:
+  - protocol: TCP
+    port: 27017
+    targetPort: 27017
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-notification-db-deployment
+  namespace: onlineeventbooking-afsah
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-notification-db
+  template:
+    metadata:
+      labels:
+        app: mongo-notification-db
+    spec:
+      containers:
+      - name: mongo-notification-db
+        image: mongo:latest
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongo-storage
+          mountPath: /data/db
+      volumes:
+      - name: mongo-storage
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-notification-db
+  namespace: onlineeventbooking-afsah
+spec:
+  selector:
+    app: mongo-notification-db
+  ports:
+  - protocol: TCP
+    port: 27017
+    targetPort: 27017
+  type: ClusterIP

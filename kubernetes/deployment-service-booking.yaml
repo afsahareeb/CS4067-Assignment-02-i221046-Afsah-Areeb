@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-service-deployment
+  namespace: onlineeventbooking-afsah
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: booking-service
+  template:
+    metadata:
+      labels:
+        app: booking-service
+    spec:
+      containers:
+      - name: booking-service
+        image: 22i1046/booking-service:latest
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        env:
+        - name: MONGO_URI_BOOKING
+          value: "mongodb://mongo-booking-db:27017/$(MONGO_DB_BOOKING)"
+        - name: EVENT_SERVICE_URL
+          value: "$(EVENT_SERVICE_URL)"  # From ConfigMap
+        - name: USER_SERVICE_URL
+          value: "$(USER_SERVICE_URL)"  # From ConfigMap
+        - name: RABBITMQ_URL
+          value: "amqp://$(RABBITMQ_USER):$(RABBITMQ_PASSWORD)@rabbitmq:5672/"
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-service
+  namespace: onlineeventbooking-afsah
+spec:
+  selector:
+    app: booking-service
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+  type: ClusterIP

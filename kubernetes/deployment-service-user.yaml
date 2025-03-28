@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service-deployment
+  namespace: onlineeventbooking-afsah
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+      - name: user-service
+        image: 22i1046/user-service:latest
+        ports:
+        - containerPort: 8001
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://$(POSTGRES_USER_USER):$(POSTGRES_PASSWORD_USER)@postgres-user:5432/$(POSTGRES_DB_USER)"
+        - name: EVENT_SERVICE_URL
+          value: "$(EVENT_SERVICE_URL)"  # From ConfigMap
+        - name: BOOKING_SERVICE_URL
+          value: "$(BOOKING_SERVICE_URL)"  # From ConfigMap
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: onlineeventbooking-afsah
+spec:
+  selector:
+    app: user-service
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8001
+  type: ClusterIP

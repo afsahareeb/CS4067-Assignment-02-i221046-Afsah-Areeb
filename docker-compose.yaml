@@ -1,34 +1,36 @@
 version: '3.8'
 
 networks:
-  event-network:  # Define a custom network
+  event-network:
 
 services:
-  # PostgreSQL for User Service
   postgres-user:
     image: postgres:latest
     container_name: postgres-user-db
     restart: always
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: postgres_user
-      POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: event_booking
+      POSTGRES_USER: ${POSTGRES_USER_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_USER}
+      POSTGRES_DB: ${POSTGRES_DB_USER}
     ports:
       - "5433:5432"
     volumes:
       - postgres_user_data:/var/lib/postgresql/data
     networks:
-      - event-network  # Attach to network
+      - event-network
 
-  # PostgreSQL for Event Service
   postgres-event:
     image: postgres:latest
     container_name: postgres-event-db
     restart: always
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: postgres_event
-      POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: Events
+      POSTGRES_USER: ${POSTGRES_USER_EVENT}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_EVENT}
+      POSTGRES_DB: ${POSTGRES_DB_EVENT}
     ports:
       - "5434:5432"
     volumes:
@@ -36,7 +38,6 @@ services:
     networks:
       - event-network
 
-  # MongoDB for Booking Service
   mongodb-booking:
     image: mongo:latest
     container_name: mongo-booking-db
@@ -48,7 +49,6 @@ services:
     networks:
       - event-network
 
-  # MongoDB for Notification Service
   mongodb-notification:
     image: mongo:latest
     container_name: mongo-notification-db
@@ -60,49 +60,51 @@ services:
     networks:
       - event-network
 
-  # User Service (FastAPI)
   user-service:
     build: ./UserService
     container_name: user-service
     restart: always
     depends_on:
       - postgres-user
+    env_file:
+      - .env
     environment:
-      DATABASE_URL: postgresql://postgres:1234@postgres-user:5432/event_booking
+      DATABASE_URL: postgresql://${POSTGRES_USER_USER}:${POSTGRES_PASSWORD_USER}@postgres-user:5432/${POSTGRES_DB_USER}
     ports:
       - "8001:8001"
     networks:
       - event-network
 
-  # Event Service (FastAPI)
   event-service:
     build: ./EventService
     container_name: event-service
     restart: always
     depends_on:
       - postgres-event
+    env_file:
+      - .env
     environment:
-      DATABASE_URL: postgresql://postgres:1234@postgres-event:5432/Events
+      DATABASE_URL: postgresql://${POSTGRES_USER_EVENT}:${POSTGRES_PASSWORD_EVENT}@postgres-event:5432/${POSTGRES_DB_EVENT}
     ports:
       - "8000:8000"
     networks:
       - event-network
 
-  # Booking Service (Flask + MongoDB)
   booking-service:
     build: ./BookingService
     container_name: booking-service
     restart: always
     depends_on:
       - mongodb-booking
+    env_file:
+      - .env
     environment:
-      MONGO_URI: mongodb://mongo-booking-db:27017/BookingDB
+      MONGO_URI: ${MONGO_URI_BOOKING}
     ports:
       - "5000:5000"
     networks:
       - event-network
 
-  # Notification Service (Flask + RabbitMQ)
   notification-service:
     build: ./NotificationService
     container_name: notification-service
@@ -110,30 +112,30 @@ services:
     depends_on:
       - mongodb-notification
       - rabbitmq
+    env_file:
+      - .env
     environment:
-      MONGO_URI: mongodb://mongo-notification-db:27017/notifications_db
-      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
-      EMAIL_HOST: smtp.gmail.com
-      EMAIL_PORT: 587
-      EMAIL_USERNAME: afsahareeb7862@gmail.com
-      EMAIL_PASSWORD: dhmy gdio iusr utyp
+      MONGO_URI: ${MONGO_URI_NOTIFICATION}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_USERNAME: ${EMAIL_USERNAME}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
     ports:
       - "5002:5002"
     networks:
       - event-network
 
-  # RabbitMQ for Notification Service
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     restart: always
     ports:
-      - "5672:5672"   # Message broker
-      - "15672:15672" # Management UI
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - event-network
 
-  # Frontend Service (HTML, CSS, JS)
   frontend-service:
     build: ./frontend
     container_name: frontend-service

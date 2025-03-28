@@ -1,0 +1,48 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: event-booking-ingress
+  namespace: onlineeventbooking-afsah
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: eventbooking.local  # Change to your desired domain (or leave blank for localhost)
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+      - path: /api/users
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 80
+      - path: /api/events
+        pathType: Prefix
+        backend:
+          service:
+            name: event-service
+            port:
+              number: 80
+      - path: /api/bookings
+        pathType: Prefix
+        backend:
+          service:
+            name: booking-service
+            port:
+              number: 80
+      - path: /api/notifications
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 80

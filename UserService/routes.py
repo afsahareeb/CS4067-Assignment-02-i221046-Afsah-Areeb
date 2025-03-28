@@ -82,7 +82,7 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
 
 
 
-EVENT_SERVICE_URL = "http://127.0.0.1:8000/events"
+EVENT_SERVICE_URL = "http://event-service:8000/events"
 @router.get("/user/events")
 def get_available_events():
     try:
@@ -121,7 +121,7 @@ def deduct_balance(user_id: int, request: DeductBalanceRequest, db: Session = De
 
 
 
-BOOKING_SERVICE_URL = "http://127.0.0.1:5000/booking"
+BOOKING_SERVICE_URL = "http://booking-service:5000/booking"
 
 @router.post("/user/book_event")
 def book_event(data: dict):

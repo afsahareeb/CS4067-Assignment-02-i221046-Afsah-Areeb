@@ -1,5 +1,6 @@
 document.getElementById("signupForm").addEventListener("submit", async function(event) {
     event.preventDefault();
+    console.log("Submitting form...")
 
     let firstName = document.getElementById("firstName").value;
     let lastName = document.getElementById("lastName").value;
@@ -7,7 +8,7 @@ document.getElementById("signupForm").addEventListener("submit", async function(
     let password = document.getElementById("password").value;
     let balance = parseFloat(document.getElementById("balance").value);
 
-    let response = await fetch("http://127.0.0.1:8001/signup", {
+    let response = await fetch("/api/user-service/signup", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -37,7 +38,7 @@ document.getElementById("signupForm").addEventListener("submit", async function(
 });
 
 async function signupUser(firstName, lastName, email, password, balance) {
-    let response = await fetch("http://127.0.0.1:8001/signup", {
+    let response = await fetch("/api/user-service/signup", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

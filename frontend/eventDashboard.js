@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 async function loadEvents() {
-    let response = await fetch("http://127.0.0.1:8001/user/events");
+    let response = await fetch("/api/user-service/user/events");
     console.log("Checking sessionStorage...");
     console.log("Stored userEmail:", sessionStorage.getItem("userEmail"));
     console.log("Stored userId:", sessionStorage.getItem("userId"));
@@ -53,7 +53,7 @@ async function loadEvents() {
 
 async function getUserId(userEmail) {
     try {
-        let response = await fetch(`http://127.0.0.1:8001/users/${userEmail}`);
+        let response = await fetch(`/api/user-service/users/${userEmail}`);
         if (!response.ok) {
             throw new Error("User not found");
         }
@@ -91,7 +91,7 @@ async function bookEvent(eventId, availableTickets, ticketPrice, userEmail) {
     };
 
     try {
-        let response = await fetch("http://127.0.0.1:8001/user/book_event", {
+        let response = await fetch("/api/user-service/user/book_event", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

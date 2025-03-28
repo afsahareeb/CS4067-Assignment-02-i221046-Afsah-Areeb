@@ -1,1 +1,1 @@
-MONGO_URI = "mongodb://localhost:27017/BookingDB"
+MONGO_URI = "mongodb://mongo-booking-db:27017/BookingDB"

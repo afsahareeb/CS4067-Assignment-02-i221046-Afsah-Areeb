@@ -1,0 +1,155 @@
+version: '3.8'
+
+networks:
+  event-network:  # Define a custom network
+
+services:
+  # PostgreSQL for User Service
+  postgres-user:
+    image: postgres:latest
+    container_name: postgres-user-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres_user
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: event_booking
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_user_data:/var/lib/postgresql/data
+    networks:
+      - event-network  # Attach to network
+
+  # PostgreSQL for Event Service
+  postgres-event:
+    image: postgres:latest
+    container_name: postgres-event-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres_event
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: Events
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_event_data:/var/lib/postgresql/data
+    networks:
+      - event-network
+
+  # MongoDB for Booking Service
+  mongodb-booking:
+    image: mongo:latest
+    container_name: mongo-booking-db
+    restart: always
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_booking_data:/data/db
+    networks:
+      - event-network
+
+  # MongoDB for Notification Service
+  mongodb-notification:
+    image: mongo:latest
+    container_name: mongo-notification-db
+    restart: always
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongo_notification_data:/data/db
+    networks:
+      - event-network
+
+  # User Service (FastAPI)
+  user-service:
+    build: ./UserService
+    container_name: user-service
+    restart: always
+    depends_on:
+      - postgres-user
+    environment:
+      DATABASE_URL: postgresql://postgres:1234@postgres-user:5432/event_booking
+    ports:
+      - "8001:8001"
+    networks:
+      - event-network
+
+  # Event Service (FastAPI)
+  event-service:
+    build: ./EventService
+    container_name: event-service
+    restart: always
+    depends_on:
+      - postgres-event
+    environment:
+      DATABASE_URL: postgresql://postgres:1234@postgres-event:5432/Events
+    ports:
+      - "8000:8000"
+    networks:
+      - event-network
+
+  # Booking Service (Flask + MongoDB)
+  booking-service:
+    build: ./BookingService
+    container_name: booking-service
+    restart: always
+    depends_on:
+      - mongodb-booking
+    environment:
+      MONGO_URI: mongodb://mongo-booking-db:27017/BookingDB
+    ports:
+      - "5000:5000"
+    networks:
+      - event-network
+
+  # Notification Service (Flask + RabbitMQ)
+  notification-service:
+    build: ./NotificationService
+    container_name: notification-service
+    restart: always
+    depends_on:
+      - mongodb-notification
+      - rabbitmq
+    environment:
+      MONGO_URI: mongodb://mongo-notification-db:27017/notifications_db
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_USERNAME: afsahareeb7862@gmail.com
+      EMAIL_PASSWORD: dhmy gdio iusr utyp
+    ports:
+      - "5002:5002"
+    networks:
+      - event-network
+
+  # RabbitMQ for Notification Service
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"   # Message broker
+      - "15672:15672" # Management UI
+    networks:
+      - event-network
+
+  # Frontend Service (HTML, CSS, JS)
+  frontend-service:
+    build: ./frontend
+    container_name: frontend-service
+    restart: always
+    depends_on:
+      - user-service
+      - event-service
+      - booking-service
+      - notification-service
+    ports:
+      - "3000:80"
+    networks:
+      - event-network
+
+volumes:
+  postgres_user_data:
+  postgres_event_data:
+  mongo_booking_data:
+  mongo_notification_data:

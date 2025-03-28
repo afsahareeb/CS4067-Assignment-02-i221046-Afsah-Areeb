@@ -30,7 +30,7 @@ def create_booking():
     
 
     # Check event availability
-    event_response = requests.get(f"http://127.0.0.1:8000/events/{event_id}/availability")
+    event_response = requests.get(f"http://event-service:8000/events/{event_id}/availability")
     if event_response.status_code != 200:
         print(f"Event Availability API Response: {event_response.status_code}, {event_response.text}")  # Debugging
         return jsonify({"error": "Event not found"}), 400
@@ -45,7 +45,7 @@ def create_booking():
     total_price = tickets * ticket_price
 
     # Process payment with correct URL
-    payment_response = requests.post("http://127.0.0.1:5000/payments", json={
+    payment_response = requests.post("http://booking-service:5000/payments", json={
         "user_id": user_id,
         "amount": total_price
 
@@ -94,7 +94,7 @@ def process_payment():
     amount = data.get("amount")
 
     # Deduct balance from User Service (Mock)
-    user_response = requests.post(f"http://127.0.0.1:8001/users/{user_id}/deduct_balance", json={
+    user_response = requests.post(f"http://user-service:8001/users/{user_id}/deduct_balance", json={
     "amount": amount
     })
 
@@ -131,7 +131,7 @@ def get_booking(booking_id):
 RABBITMQ_QUEUE = "booking_notifications"
 def publish_message(message):
     """Function to publish messages to RabbitMQ"""
-    connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+    connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
     channel = connection.channel()
     channel.queue_declare(queue=RABBITMQ_QUEUE)
 

@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     if (bookingStatus === "confirmed" && bookingId && bookingId.trim() !== "")
         {
         try {
-            let response = await fetch(`http://127.0.0.1:5000/booking/${bookingId}`);
+            let response = await fetch(`/api/booking-service/booking/${bookingId}`);
             if (!response.ok) throw new Error("Failed to fetch booking details.");
 
             let bookingData = await response.json();

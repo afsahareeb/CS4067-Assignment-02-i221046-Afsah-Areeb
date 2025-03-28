@@ -1,14 +1,18 @@
-FROM node:18-alpine
+# Use Nginx as the base image
+FROM nginx:alpine
 
-WORKDIR /app
+# Remove default Nginx config and use custom one
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy package.json and install dependencies first (Docker caching)
-COPY package.json package-lock.json ./
-RUN npm install
+# Set working directory inside the container
+WORKDIR /usr/share/nginx/html
 
-# Copy rest of the frontend code
+# Copy frontend files (HTML, CSS, JS) to Nginx's default location
 COPY . .
 
-EXPOSE 3000
+# Expose port 80
+EXPOSE 80
 
-CMD ["npm", "start"]
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]

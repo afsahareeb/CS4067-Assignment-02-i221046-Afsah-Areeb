@@ -29,16 +29,16 @@ spec:
         - name: RABBITMQ_URL
           value: "amqp://$(RABBITMQ_USER):$(RABBITMQ_PASSWORD)@rabbitmq:5672/"
         - name: EMAIL_HOST
-          value: "$(SMTP_HOST)"
+          value: "$(EMAIL_HOST)"
         - name: EMAIL_PORT
-          value: "$(SMTP_PORT)"
+          value: "$(EMAIL_PORT)"
         - name: EMAIL_USERNAME
-          value: "$(SMTP_USERNAME)"
+          value: "$(EMAIL_USERNAME)"
         - name: EMAIL_PASSWORD
           valueFrom:
               secretKeyRef:
                 name: app-secrets
-                key: SMTP_PASSWORD
+                key: EMAIL_PASSWORD
         resources:
           limits:
             memory: "512Mi"

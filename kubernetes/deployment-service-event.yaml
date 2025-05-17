@@ -33,14 +33,6 @@ spec:
           requests:
             memory: "256Mi"
             cpu: "250m"
-        readinessProbe:
-          exec:
-            command:
-            - pg_isready
-            - -h
-            - event-db
-          initialDelaySeconds: 10
-          periodSeconds: 5
 
 ---
 apiVersion: v1

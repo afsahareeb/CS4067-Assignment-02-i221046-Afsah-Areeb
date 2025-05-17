@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: 22i1046/frontend:latest
+        image: 22i1046/frontend-service:latest
         ports:
         - containerPort: 80
         envFrom:
@@ -50,4 +50,4 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 80
-  type: LoadBalancer  # Change to NodePort if required
+  type: ClusterIP  # Change to NodePort if required

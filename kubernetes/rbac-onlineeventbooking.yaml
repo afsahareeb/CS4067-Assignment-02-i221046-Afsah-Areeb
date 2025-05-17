@@ -1,0 +1,24 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: onlineeventbooking-afsah
+  name: ingress-access
+rules:
+- apiGroups: [""]
+  resources: ["pods", "endpoints", "services"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: onlineeventbooking-afsah
+  name: ingress-access-binding
+subjects:
+- kind: ServiceAccount
+  name: ingress-nginx
+  namespace: ingress-nginx  # often "ingress-nginx" or "default"
+roleRef:
+  kind: Role
+  name: ingress-access
+  apiGroup: rbac.authorization.k8s.io

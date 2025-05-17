@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: eventbooking.local  # Change to your desired domain (or leave blank for localhost)
+  - host: eventbooking.local
     http:
       paths:
       - path: /
@@ -18,28 +18,28 @@ spec:
             name: frontend-service
             port:
               number: 80
-      - path: /api/users
+      - path: /api/users-service
         pathType: Prefix
         backend:
           service:
             name: user-service
             port:
               number: 80
-      - path: /api/events
+      - path: /api/events-service
         pathType: Prefix
         backend:
           service:
             name: event-service
             port:
               number: 80
-      - path: /api/bookings
+      - path: /api/bookings-service
         pathType: Prefix
         backend:
           service:
             name: booking-service
             port:
               number: 80
-      - path: /api/notifications
+      - path: /api/notifications-service
         pathType: Prefix
         backend:
           service:

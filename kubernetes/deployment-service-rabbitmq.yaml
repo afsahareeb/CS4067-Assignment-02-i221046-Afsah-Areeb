@@ -28,7 +28,7 @@ spec:
         - name: RABBITMQ_DEFAULT_PASS
           valueFrom:
             secretKeyRef:
-              name: db-secrets
+              name: app-secrets
               key: RABBITMQ_PASSWORD
         resources:
           limits:
